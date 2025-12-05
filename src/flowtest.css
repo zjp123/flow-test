@@ -92,7 +92,7 @@
 .flow-node-actions {
   position: absolute;
   top: 50%;
-  left: -80px;
+  /* left: -80px; */
   transform: translateY(-50%);
   display: flex;
   gap: 8px;
@@ -102,6 +102,7 @@
 .flow-node-actions .action-btn {
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  color: #000;
 }
 
 /* 提交节点 */

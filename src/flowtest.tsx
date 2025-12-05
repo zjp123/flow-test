@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   ReactFlow,
   Node,
@@ -15,6 +15,7 @@ import {
 import { Button, Popover } from 'antd';
 import '@xyflow/react/dist/style.css';
 import './flowtest.css';
+import { ApartmentOutlined } from '@ant-design/icons';
 // import { PlusCircleOutlined } from '@ant-design/icons';
 
 // 节点数据类型
@@ -49,11 +50,11 @@ function ConditionNode({ data }: { data: NodeData }) {
     <div className="flow-node flow-node-condition">
       <Handle type="target" position={Position.Top} />
       <Handle type="source" position={Position.Bottom} />
-      {data.onDelete && (
+      {/* {data.onDelete && (
         <div className="flow-node-delete" onClick={data.onDelete}>
           ×
         </div>
-      )}
+      )} */}
       <div className="flow-node-header">{data.label}</div>
       <div className="flow-node-content" onClick={data.onConfig}>
         <span className="flow-node-text">
@@ -70,23 +71,32 @@ function ConditionNode({ data }: { data: NodeData }) {
 function ApprovalNode({ data }: { data: NodeData }) {
   const [showActions, setShowActions] = useState(false);
 
+  const handleDeleteClick = () => {
+    setShowActions(true);
+  };
+
+  const handleCancel = () => {
+    setShowActions(false);
+  };
+
+  const handleConfirm = () => {
+    data.onDelete?.();
+    setShowActions(false);
+  };
+
   return (
-    <div 
-      className="flow-node flow-node-approval"
-      onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
-    >
+    <div className="flow-node flow-node-approval">
       <Handle type="target" position={Position.Top} />
       <Handle type="source" position={Position.Bottom} />
-      {data.onDelete && (
-        <div className="flow-node-delete" onClick={data.onDelete}>
+      {data.onDelete && !showActions && (
+        <div className="flow-node-delete" onClick={handleDeleteClick}>
           ×
         </div>
       )}
       {showActions && (
         <div className="flow-node-actions">
-          <Button size="small" className="action-btn">取消</Button>
-          <Button size="small" type="primary" className="action-btn">保存</Button>
+          <Button size="small" className="action-btn" onClick={handleCancel}>取消</Button>
+          <Button size="small" type="primary" className="action-btn" onClick={handleConfirm}>确定</Button>
         </div>
       )}
       <div className="flow-node-header">{data.label}</div>
@@ -128,9 +138,10 @@ function AddConditionNode({ data }: { data: NodeData }) {
           setOpen(false);
         }}
       >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        {/* <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M8 2v12M2 8h12" stroke="#0EA5E9" strokeWidth="2" strokeLinecap="round" />
-        </svg>
+        </svg> */}
+        <ApartmentOutlined style={{ color: '#0EA5E9' }} />
         <span>通用条件</span>
       </div>
       <div 
@@ -140,9 +151,10 @@ function AddConditionNode({ data }: { data: NodeData }) {
           setOpen(false);
         }}
       >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        {/* <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M8 2v12M2 8h12" stroke="#0EA5E9" strokeWidth="2" strokeLinecap="round" />
-        </svg>
+        </svg> */}
+        <ApartmentOutlined style={{ color: '#0EA5E9' }} />
         <span>特殊条件</span>
       </div>
     </div>
@@ -158,6 +170,7 @@ function AddConditionNode({ data }: { data: NodeData }) {
         open={open}
         onOpenChange={setOpen}
         placement="rightTop"
+        arrow={false}
       >
         <div className="add-condition-button">
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
@@ -209,22 +222,23 @@ type FlowType = 'single' | 'multiple';
 
 export default function FlowTest() {
   const [flowType, setFlowType] = useState<FlowType>('single');
+  const [nodeCounter, setNodeCounter] = useState(10); // 节点计数器
 
   // 节点尺寸常量
-  const NODE_DIMENSIONS = {
+  const NODE_DIMENSIONS = useMemo(() => ({
     submit: { width:244, height: 120 },
     condition: { width: 200, height: 80 },
     approval: { width: 200, height: 80 },
     end: { width: 200, height: 80 },
     addCondition: { width: 60, height: 40 },
     addApproval: { width: 120, height: 40 },
-  };
+  }), []);
   const NODE_GAP = 80; // 节点间距
 
   // 计算中心对齐的 x 坐标
-  const getCenterX = (parentX: number, parentWidth: number, childWidth: number) => {
+  const getCenterX = useCallback((parentX: number, parentWidth: number, childWidth: number) => {
     return parentX + parentWidth / 2 - childWidth / 2;
-  };
+  }, []);
 
   // 单条件流程初始节点
   const submitX = 250;
@@ -399,8 +413,77 @@ export default function FlowTest() {
   // 添加条件节点
   const handleAddCondition = useCallback((type: string) => {
     console.log('添加条件:', type);
-    // 实现添加条件逻辑
-  }, []);
+    
+    // 查找 add-condition-1 节点
+    const addConditionNode = nodes.find(n => n.id === 'add-condition-1');
+    if (!addConditionNode) return;
+
+    // 生成新节点ID
+    const conditionId = `condition-${nodeCounter}`;
+    const approvalId = `approval-${nodeCounter}`;
+
+    // 计算新节点位置（在 add-condition-1 下方，中心对齐）
+    const conditionX = getCenterX(
+      addConditionNode.position.x,
+      NODE_DIMENSIONS.addCondition.width,
+      NODE_DIMENSIONS.condition.width
+    );
+    const conditionY = addConditionNode.position.y + NODE_DIMENSIONS.addCondition.height + NODE_GAP;
+
+    const approvalX = conditionX; // 审批节点与条件节点 x 坐标相同
+    const approvalY = conditionY + NODE_DIMENSIONS.condition.height + NODE_GAP;
+
+    // 创建新节点
+    const newConditionNode: Node = {
+      id: conditionId,
+      type: 'condition',
+      position: { x: conditionX, y: conditionY },
+      data: {
+        label: type,
+        content: '请设置条件',
+        hasError: true,
+        branchId: `branch-${nodeCounter}`,
+      },
+    };
+
+    const newApprovalNode: Node = {
+      id: approvalId,
+      type: 'approval',
+      position: { x: approvalX, y: approvalY },
+      data: {
+        label: '审批',
+        content: '请设置审批人',
+        hasError: true,
+        branchId: `branch-${nodeCounter}`,
+      },
+    };
+
+    // 添加节点
+    setNodes((nds) => [...nds, newConditionNode, newApprovalNode]);
+
+    // 添加连接边
+    const newEdges: Edge[] = [
+      {
+        id: `e-add-${conditionId}`,
+        source: 'add-condition-1',
+        target: conditionId,
+        type: 'smoothstep',
+        style: { stroke: '#D1D5DB', strokeWidth: 2 },
+      },
+      {
+        id: `e-${conditionId}-${approvalId}`,
+        source: conditionId,
+        target: approvalId,
+        type: 'smoothstep',
+        style: { stroke: '#D1D5DB', strokeWidth: 2 },
+      },
+    ];
+
+    setEdges((eds) => [...eds, ...newEdges]);
+
+    // 更新计数器
+    setNodeCounter(nodeCounter + 1);
+  }, [nodes, nodeCounter, setNodes, setEdges, NODE_DIMENSIONS, NODE_GAP, getCenterX]);
 
   // 添加审批节点
   const handleAddApproval = useCallback((branchId?: string) => {
