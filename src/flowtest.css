@@ -1,0 +1,245 @@
+/* 流程节点通用样式 */
+.flow-node {
+  min-width: 200px;
+  border-radius: 8px;
+  overflow: visible;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+  position: relative;
+}
+
+.flow-node:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.flow-node-header {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+}
+
+.flow-node-content {
+  padding: 12px 40px;
+  background: #F6F7F8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  min-height: 44px;
+  border-radius: 6px;
+}
+
+.flow-node-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #374151;
+  flex: 1;
+}
+
+.flow-node-error {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: #EF4444;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.flow-node-arrow {
+  color: #9CA3AF;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.flow-node-button {
+  text-align: center;
+  color: #1D2129;
+  font-size: 14px;
+  /* width: 100%; */
+}
+
+.flow-node-delete {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  z-index: 10;
+  transition: background 0.2s;
+}
+
+.flow-node-delete:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.flow-node-actions {
+  position: absolute;
+  top: 50%;
+  left: -80px;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.flow-node-actions .action-btn {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 提交节点 */
+.flow-node-submit {
+  background-color: #86909C;
+  padding: 12px;
+  width: 220px;
+  height: 96px;
+}
+.flow-node-submit .flow-node-header {
+  /* background: #6B7280; */
+  /* border-radius: 8px 8px 0 0; */
+  color: #fff;
+  padding: 0;
+  color: #fff;
+  margin-bottom: 5px;
+}
+
+/* 条件节点 */
+.flow-node-condition .flow-node-header {
+  background: #0EA5E9;
+  border-radius: 8px 8px 0 0;
+}
+
+/* 审批节点 */
+.flow-node-approval .flow-node-header {
+  background: #FF9500;
+  border-radius: 8px 8px 0 0;
+}
+
+/* 结束节点 */
+.flow-node-end .flow-node-header {
+  background: #6B7280;
+  border-radius: 8px 8px 0 0;
+}
+
+/* 添加条件按钮 */
+.add-condition-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  width: 60px;
+}
+
+.add-condition-button {
+  cursor: pointer;
+  transition: transform 0.2s;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* color: #1890FF !important;
+  width: 50px;
+  height: 50px; */
+}
+
+.add-condition-button:hover {
+  transform: scale(1.1);
+}
+
+.add-condition-menu {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  min-width: 140px;
+}
+
+.add-condition-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #374151;
+  transition: background 0.2s;
+}
+
+.add-condition-menu-item:hover {
+  background: #F3F4F6;
+}
+
+/* 添加审批按钮 */
+.add-approval-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  width: 120px;
+}
+
+.add-approval-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #0EA5E9 !important;
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s;
+}
+
+.add-approval-button:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  color: #0EA5E9 !important;
+}
+
+/* React Flow 自定义样式 */
+.react-flow__node {
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.react-flow__handle {
+  width: 8px;
+  height: 8px;
+  background: #D1D5DB;
+  border: 2px solid white;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.react-flow__node:hover .react-flow__handle {
+  opacity: 1;
+}
+
+.react-flow__edge-path {
+  stroke-width: 2;
+}
+
+.react-flow__attribution {
+  display: none;
+}
+

@@ -9,12 +9,15 @@ import {
   Connection,
   type Node,
   type Edge,
-  type FitViewOptions,
-  type OnConnect,
-  type OnNodesChange,
-  type OnEdgesChange,
-  type OnNodeDrag,
-  type DefaultEdgeOptions,
+  Controls,
+  // Background,
+  // BackgroundVariant,
+  // type FitViewOptions,
+  // type OnConnect,
+  // type OnNodesChange,
+  // type OnEdgesChange,
+  // type OnNodeDrag,
+  // type DefaultEdgeOptions,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -44,7 +47,7 @@ export default function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <div style={{ width: '80%', height: '80%', border: '1px solid black' }}>
+      <div style={{ width: '80%', height: '80%', border: '1px solid black', backgroundColor: '#F6F7F8' }}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -52,7 +55,12 @@ export default function App() {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           fitView
-        />
+        >
+          <Controls orientation="horizontal" >
+            <h3>666</h3>
+          </Controls>
+          {/* <Background style={{ backgroundColor: '#F6F7F8' }} variant={BackgroundVariant.Dots} gap={12} size={1} /> */}
+        </ReactFlow>
       </div>
     </div>
   );
