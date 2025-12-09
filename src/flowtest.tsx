@@ -208,12 +208,12 @@ function AddApprovalNode({ data }: { data: NodeData }) {
 
 // 定义节点类型
 const nodeTypes: NodeTypes = {
-  submit: SubmitNode,
-  condition: ConditionNode,
-  approval: ApprovalNode,
-  end: EndNode,
-  addCondition: AddConditionNode,
-  addApproval: AddApprovalNode,
+  submit: SubmitNode, // 开始节点
+  condition: ConditionNode, // 通用节点
+  approval: ApprovalNode, // 审批节点
+  end: EndNode, // 结束节点
+  addCondition: AddConditionNode, // 添加条件节点
+  addApproval: AddApprovalNode, // 添加审批节点
 };
 
 // 流程类型
@@ -229,7 +229,7 @@ export default function FlowTest() {
     submit: { width:244, height: 120 },
     condition: { width: 200, height: 80 },
     approval: { width: 200, height: 80 },
-    end: { width: 200, height: 80 },
+    end: { width: 214.5, height: 80 }, // 结束节点dom 渲染实际宽度，不是缩放后的，通过浏览器查看dom结构得到
     addCondition: { width: 60, height: 40 },
     addApproval: { width: 120, height: 40 },
   }), []);
@@ -245,6 +245,10 @@ export default function FlowTest() {
   const submitY = 0;
   const addConditionX = getCenterX(submitX, NODE_DIMENSIONS.submit.width, NODE_DIMENSIONS.addCondition.width);
   const addConditionY = submitY + NODE_DIMENSIONS.submit.height + NODE_GAP;
+  
+  // 结束节点位置（在add-condition-1下方，中心对齐）
+  const endX = getCenterX(addConditionX, NODE_DIMENSIONS.addCondition.width, NODE_DIMENSIONS.end.width);
+  const endY = addConditionY + NODE_DIMENSIONS.addCondition.height + NODE_GAP;
 
   const singleFlowNodes: Node[] = [
     {
@@ -259,30 +263,12 @@ export default function FlowTest() {
       position: { x: addConditionX, y: addConditionY },
       data: { label: '', content: '' },
     },
-    // {
-    //   id: 'condition-1',
-    //   type: 'condition',
-    //   position: { x: 200, y: 200 },
-    //   data: { label: '通用条件1', content: '请设置条件', hasError: true, branchId: 'branch-1' },
-    // },
-    // {
-    //   id: 'approval-1',
-    //   type: 'approval',
-    //   position: { x: 200, y: 320 },
-    //   data: { label: '审批', content: '请设置审批人', hasError: true, branchId: 'branch-1' },
-    // },
-    // {
-    //   id: 'add-approval-1',
-    //   type: 'addApproval',
-    //   position: { x: 280, y: 440 },
-    //   data: { label: '', content: '', branchId: 'branch-1' },
-    // },
-    // {
-    //   id: 'end-1',
-    //   type: 'end',
-    //   position: { x: 200, y: 520 },
-    //   data: { label: '结束', content: '可设置无需审批条件' },
-    // },
+    {
+      id: 'end-1',
+      type: 'end',
+      position: { x: endX, y: endY },
+      data: { label: '结束', content: '可设置无需审批条件' },
+    },
   ];
 
   // 多条件流程初始节点
@@ -366,10 +352,7 @@ export default function FlowTest() {
 
   const singleFlowEdges: Edge[] = [
     { id: 'e-submit-add', source: 'submit-1', target: 'add-condition-1' },
-    { id: 'e-add-condition', source: 'add-condition-1', target: 'condition-1' },
-    // { id: 'e-condition-approval', source: 'condition-1', target: 'approval-1' },
-    // { id: 'e-approval-add', source: 'approval-1', target: 'add-approval-1' },
-    // { id: 'e-add-end', source: 'add-approval-1', target: 'end-1' },
+    { id: 'e-add-end', source: 'add-condition-1', target: 'end-1' },
   ];
 
   const multipleFlowEdges: Edge[] = [
@@ -414,24 +397,54 @@ export default function FlowTest() {
   const handleAddCondition = useCallback((type: string) => {
     console.log('添加条件:', type);
     
-    // 查找 add-condition-1 节点
+    // 查找 add-condition-1 节点和 end-1 节点
     const addConditionNode = nodes.find(n => n.id === 'add-condition-1');
-    if (!addConditionNode) return;
+    const endNode = nodes.find(n => n.id === 'end-1');
+    if (!addConditionNode || !endNode) return;
+
+    // 计算当前已有的条件节点数量（用于横向排列多分支）
+    const existingConditions = nodes.filter(n => n.type === 'condition');
+    const conditionCount = existingConditions.length;
 
     // 生成新节点ID
     const conditionId = `condition-${nodeCounter}`;
     const approvalId = `approval-${nodeCounter}`;
 
-    // 计算新节点位置（在 add-condition-1 下方，中心对齐）
-    const conditionX = getCenterX(
-      addConditionNode.position.x,
-      NODE_DIMENSIONS.addCondition.width,
-      NODE_DIMENSIONS.condition.width
-    );
-    const conditionY = addConditionNode.position.y + NODE_DIMENSIONS.addCondition.height + NODE_GAP;
+    // 计算新节点位置
+    let conditionX: number;
+    let conditionY: number;
+    let approvalX: number;
+    let approvalY: number;
 
-    const approvalX = conditionX; // 审批节点与条件节点 x 坐标相同
-    const approvalY = conditionY + NODE_DIMENSIONS.condition.height + NODE_GAP;
+    if (conditionCount === 0) {
+      // 第一个条件节点：在 add-condition-1 正下方，中心对齐
+      conditionX = getCenterX(
+        addConditionNode.position.x,
+        NODE_DIMENSIONS.addCondition.width,
+        NODE_DIMENSIONS.condition.width
+      );
+      conditionY = addConditionNode.position.y + NODE_DIMENSIONS.addCondition.height + NODE_GAP;
+      approvalX = conditionX;
+      approvalY = conditionY + NODE_DIMENSIONS.condition.height + NODE_GAP;
+
+      // 需要将 end-1 节点下移，为新节点腾出空间
+      const newEndY = approvalY + NODE_DIMENSIONS.approval.height + NODE_GAP;
+      setNodes((nds) => nds.map(node => 
+        node.id === 'end-1' 
+          ? { ...node, position: { ...node.position, y: newEndY } }
+          : node
+      ));
+    } else {
+      // 多个条件节点：横向排列
+      const branchWidth = NODE_DIMENSIONS.condition.width + 150; // 每个分支的宽度间距
+      const firstCondition = existingConditions[0];
+      
+      // 新分支在右侧
+      conditionX = firstCondition.position.x + conditionCount * branchWidth;
+      conditionY = firstCondition.position.y;
+      approvalX = conditionX;
+      approvalY = conditionY + NODE_DIMENSIONS.condition.height + NODE_GAP;
+    }
 
     // 创建新节点
     const newConditionNode: Node = {
@@ -461,25 +474,43 @@ export default function FlowTest() {
     // 添加节点
     setNodes((nds) => [...nds, newConditionNode, newApprovalNode]);
 
-    // 添加连接边
-    const newEdges: Edge[] = [
-      {
-        id: `e-add-${conditionId}`,
-        source: 'add-condition-1',
-        target: conditionId,
-        type: 'smoothstep',
-        style: { stroke: '#D1D5DB', strokeWidth: 2 },
-      },
-      {
-        id: `e-${conditionId}-${approvalId}`,
-        source: conditionId,
-        target: approvalId,
-        type: 'smoothstep',
-        style: { stroke: '#D1D5DB', strokeWidth: 2 },
-      },
-    ];
+    // 处理连接边
+    setEdges((eds) => {
+      // 如果是第一个条件节点，移除 add-condition-1 → end-1 的直接连接
+      let updatedEdges = eds;
+      if (conditionCount === 0) {
+        updatedEdges = eds.filter(edge => 
+          !(edge.source === 'add-condition-1' && edge.target === 'end-1')
+        );
+      }
 
-    setEdges((eds) => [...eds, ...newEdges]);
+      // 添加新的连接边
+      const newEdges: Edge[] = [
+        {
+          id: `e-add-${conditionId}`,
+          source: 'add-condition-1',
+          target: conditionId,
+          type: 'smoothstep',
+          style: { stroke: '#D1D5DB', strokeWidth: 2 },
+        },
+        {
+          id: `e-${conditionId}-${approvalId}`,
+          source: conditionId,
+          target: approvalId,
+          type: 'smoothstep',
+          style: { stroke: '#D1D5DB', strokeWidth: 2 },
+        },
+        {
+          id: `e-${approvalId}-end`,
+          source: approvalId,
+          target: 'end-1',
+          type: 'smoothstep',
+          style: { stroke: '#D1D5DB', strokeWidth: 2 },
+        },
+      ];
+
+      return [...updatedEdges, ...newEdges];
+    });
 
     // 更新计数器
     setNodeCounter(nodeCounter + 1);
